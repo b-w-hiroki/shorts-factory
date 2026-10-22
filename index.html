@@ -587,7 +587,7 @@
       <div class="settings-note">
         キーを設定すると、台本生成が <b>claude-sonnet-5</b> による本物のAI生成に切り替わります(商品URL・商品名・特徴をもとに生成)。
         未設定・生成失敗時は内蔵テンプレートで生成します。<br>
-        <b>注意:</b> キーはこの端末のブラウザ(localStorage)にのみ保存され、外部には送信されません(Anthropic APIへの直接リクエストを除く)。
+        <b>注意:</b> APIキーはこのタブを開いている間だけメモリに保持されます。Anthropic APIへの直接リクエストに使用します。共有端末では使用後にクリアしてください。
         共有PCでは設定しないでください。
       </div>
       <div class="modal-actions">
@@ -879,8 +879,11 @@ function buildAllScripts(ctx) {
 
 /* ================= Claude API mode (optional) ================= */
 const API_KEY_STORE = "sf_api_key";
+// Remove the old persisted key without reading it into page memory.
+localStorage.removeItem(API_KEY_STORE);
+let apiKey = "";
 async function generateViaAPI(ctx) {
-  const key = localStorage.getItem(API_KEY_STORE);
+  const key = apiKey;
   if (!key) return null;
   const prompt = `あなたは縦型ショート動画(55秒)の放送作家です。以下の商品のアフィリエイト用ショート動画台本を3タイプ作成してください。
 
@@ -926,22 +929,22 @@ document.querySelectorAll(".overlay").forEach(o =>
   o.addEventListener("click", e => { if (e.target === o) o.classList.remove("open"); }));
 
 $("settings-btn").addEventListener("click", () => {
-  $("api-key-input").value = localStorage.getItem(API_KEY_STORE) || "";
+  $("api-key-input").value = apiKey || "";
   updateApiStatus();
   openOverlay("settings-overlay");
 });
 function updateApiStatus() {
-  const on = !!localStorage.getItem(API_KEY_STORE);
+  const on = !!apiKey;
   $("api-key-status").textContent = on ? "API MODE: ON (claude-sonnet-5)" : "API MODE: OFF (テンプレート生成)";
   $("settings-btn").classList.toggle("on", on);
 }
 $("api-key-save").addEventListener("click", () => {
   const v = $("api-key-input").value.trim();
-  if (v) localStorage.setItem(API_KEY_STORE, v);
+  apiKey = v;
   updateApiStatus();
 });
 $("api-key-clear").addEventListener("click", () => {
-  localStorage.removeItem(API_KEY_STORE);
+  apiKey = "";
   $("api-key-input").value = "";
   updateApiStatus();
 });
@@ -1053,7 +1056,7 @@ btn.addEventListener("click", async () => {
   await wait(1400);
 
   setStep(3);
-  const apiOn = !!localStorage.getItem(API_KEY_STORE);
+  const apiOn = !!apiKey;
   statusEl.textContent = apiOn
     ? `claude-sonnet-5 で台本を生成中 ... 「${name}」× 3タイプ`
     : `台本を生成中 ... 「${name}」× 3タイプ同時生成`;
