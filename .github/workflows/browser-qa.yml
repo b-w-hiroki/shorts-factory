@@ -1,0 +1,29 @@
+name: Offline browser regression
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install isolated test tooling (no audit or lifecycle scripts)
+        run: npm install --prefix "$RUNNER_TEMP/shorts-qa" --no-audit --no-fund --ignore-scripts playwright@1.56.1
+      - name: Install Chromium
+        run: node "$RUNNER_TEMP/shorts-qa/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Test offline generation and responsive layout
+        env:
+          NODE_PATH: ${{ runner.temp }}/shorts-qa/node_modules
+        run: node qa/browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shorts-browser-screenshots
+          path: qa-artifacts/
+          retention-days: 7
