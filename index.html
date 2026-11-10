@@ -155,6 +155,7 @@
     flex-direction: column;
     min-height: 0;
   }
+  .demo-note { padding: 14px 18px; font-size: 13px; line-height: 1.8; color: var(--amber); overflow-wrap: anywhere; }
   .panel-title {
     padding: 10px 14px;
     font-size: 11px;
@@ -464,10 +465,12 @@
 
   /* ============ MOBILE ============ */
   @media (max-width: 900px) {
-    body { overflow: auto; }
-    main { grid-template-columns: 1fr; }
-    .gen-grid { grid-template-columns: 1fr; }
+    body { height: auto; min-height: 100%; overflow: auto; }
+    main { flex: none; grid-template-columns: 1fr; }
+    .gen-grid { flex: none; grid-template-columns: 1fr; }
     .gen-card { min-height: 120px; }
+    .gen-card-body { flex: none; overflow: visible; }
+    #generator { flex: none; }
     nav.steps { order: 10; width: 100%; margin-left: 0; justify-content: space-between; }
     .subtitle { display: none; }
     #clock { font-size: 15px; }
@@ -488,24 +491,24 @@
   <div class="logo">SHORTS FACTORY</div>
   <div class="subtitle">縦型ショート・自動生成システム</div>
   <nav class="steps">
-    <div class="step active" data-step="1">01 走査</div>
-    <div class="step" data-step="2">02 解析</div>
+    <div class="step active" data-step="1">01 入力</div>
+    <div class="step" data-step="2">02 構成</div>
     <div class="step" data-step="3">03 生成</div>
-    <div class="step" data-step="4">04 予約</div>
+    <div class="step" data-step="4">04 候補</div>
   </nav>
   <button class="hbtn" id="history-btn">HISTORY</button>
   <button class="hbtn" id="settings-btn">API ⚙</button>
-  <div class="badge">SYSTEM ONLINE</div>
+  <div class="badge">LOCAL DEMO</div>
   <div id="clock">00:00:00<small>JST</small></div>
 </header>
 
 <main>
   <!-- ===== LEFT : RESEARCH ===== -->
   <section class="panel" id="research">
-    <div class="panel-title" id="research-title">RESEARCH <span class="jp">バズ走査</span><span class="toggle-hint">▾ 展開</span></div>
+    <div class="panel-title" id="research-title">RESEARCH <span class="jp">走査デモ・実走査なし</span><span class="toggle-hint">▾ 展開</span></div>
     <div class="counter-block">
       <div id="buzz-count">0<small>本</small></div>
-      <div class="counter-label">解析済み<br>バズ動画</div>
+      <div class="counter-label">デモ表示<br>架空の件数</div>
     </div>
     <div class="hooks-block">
       <div class="hooks-head"><span>HOOK TYPES</span><span>伸びている型</span></div>
@@ -514,7 +517,7 @@
       <div class="hook-row"><span>ランキング</span><span class="bar"><i data-hook="2"></i></span><span class="pct" data-hookpct="2">0%</span></div>
     </div>
     <div id="feed"></div>
-    <div class="panel-foot">SRC YOUTUBE / TIKTOK &nbsp;·&nbsp; SCAN DAILY</div>
+    <div class="panel-foot">SIMULATION &nbsp;·&nbsp; YouTube / TikTok の実データは取得していません</div>
   </section>
 
   <!-- ===== RIGHT ===== -->
@@ -542,6 +545,11 @@
       <div class="panel-title">GENERATOR <span class="jp">縦型ショート 3種同時生成</span>
         <button class="gbtn" id="copy-all-btn" style="display:none">3本まとめてコピー</button>
       </div>
+      <div class="demo-note" role="note">
+        <strong>投稿前に確認してください</strong><br>
+        台本は未検証の下書きです。商品ページ本文は取得していません。商品名・価格・効果・実績・広告表現を元の資料と照合し、根拠のない断定や比較を削ってからコピーしてください。<br>
+        API 設定時は入力 URL・商品名・特徴を Anthropic に送信します。キー未設定時は端末内のテンプレートを使います。
+      </div>
       <div class="gen-grid">
         <div class="gen-card" id="card-a">
           <div class="gen-card-head"><span class="tag">A</span><span class="name">問題提起型</span>
@@ -562,7 +570,7 @@
           <div class="gen-card-body"><div class="placeholder">STANDBY</div></div>
         </div>
       </div>
-      <div id="schedule"><span class="sched-title">SCHEDULE 投稿予約</span></div>
+      <div id="schedule"><span class="sched-title">SCHEDULE 投稿候補（予約・投稿なし）</span></div>
     </section>
   </div>
 </main>
@@ -685,9 +693,9 @@ $("research-title").addEventListener("click", () => {
 /* ================= status bar ================= */
 const statusEl = $("status-text");
 const idleStatuses = [
-  "バズショートを走査中 ・ フックと構成を解析しています",
-  "TikTok急上昇を監視中 ・ 伸びている型を抽出しています",
-  "YouTube Shorts上位を解析中 ・ 冒頭2秒のフックを分類しています",
+  "走査デモを表示中 ・ 実データは取得していません",
+  "TikTok の監視・投稿は行いません ・ 表示はシミュレーションです",
+  "YouTube の実動画は解析していません ・ 台本は確認用の下書きです",
 ];
 let idleIdx = 0;
 let idleTimer = setInterval(rotateIdle, 7000);
@@ -969,7 +977,7 @@ function renderSchedule() {
   const slots = nextSlots(3);
   const platforms = ["TikTok", "YouTube Shorts", "Reels"];
   const el = $("schedule");
-  el.innerHTML = `<span class="sched-title">SCHEDULE 投稿予約</span>` +
+  el.innerHTML = `<span class="sched-title">SCHEDULE 投稿候補（予約・投稿なし）</span>` +
     ["A", "B", "C"].map((k, i) =>
       `<span class="sched-slot"><span class="k">${k}</span><span class="platform">${platforms[i]}</span><span class="time">${slots[i]}</span></span>`
     ).join("");
@@ -1047,12 +1055,12 @@ btn.addEventListener("click", async () => {
   lastCtx = ctx;
 
   setStep(1);
-  statusEl.textContent = `商品ページを走査中 ... ${url}`;
+  statusEl.textContent = `入力を整理中（商品ページは取得しません） ... ${url}`;
   await wait(1200);
 
   setStep(2);
   const genreLabel = { beauty: "美容", gadget: "ガジェット", health: "健康", food: "グルメ", generic: "汎用" }[genre];
-  statusEl.textContent = `構成を解析中 ... ジャンル判定: ${genreLabel} / バズ${buzzCount}本の型と照合`;
+  statusEl.textContent = `構成を選択中 ... ジャンル推定: ${genreLabel} / 定義済みテンプレートを使用`;
   await wait(1400);
 
   setStep(3);
@@ -1072,7 +1080,7 @@ btn.addEventListener("click", async () => {
   await Promise.all(["a", "b", "c"].map((t, i) => fillCard(t, scripts[t], i * 500)));
 
   setStep(4);
-  statusEl.textContent = "生成完了 ・ 投稿枠を自動予約しました(↻で1本ずつ作り直せます)";
+  statusEl.textContent = "下書き完成 ・ 投稿候補時刻を計算しました（予約・投稿なし）";
   renderSchedule();
   $("copy-all-btn").style.display = "";
   saveToHistory({ ts: Date.now(), url, name, ctx, scripts });
