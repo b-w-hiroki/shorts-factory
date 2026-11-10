@@ -34,6 +34,7 @@ const server=createServer((req,res)=>{if(req.url==='/'){res.writeHead(200,{'Cont
   for(const width of [390,1280]){
    await page.setViewportSize({width,height:844});
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+   if(width===390) assert.equal(await page.evaluate(()=>document.querySelector('#schedule').getBoundingClientRect().top>=document.querySelector('.gen-grid').getBoundingClientRect().bottom && document.querySelector('footer').getBoundingClientRect().top>=document.querySelector('main').getBoundingClientRect().bottom),true);
    await page.screenshot({path:`qa-artifacts/shorts-${width}.png`,fullPage:true});
   }
   await page.locator('#history-btn').click();assert.ok(await page.locator('#history-list').innerText());

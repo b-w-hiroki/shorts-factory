@@ -465,10 +465,12 @@
 
   /* ============ MOBILE ============ */
   @media (max-width: 900px) {
-    body { overflow: auto; }
-    main { grid-template-columns: 1fr; }
-    .gen-grid { grid-template-columns: 1fr; }
+    body { height: auto; min-height: 100%; overflow: auto; }
+    main { flex: none; grid-template-columns: 1fr; }
+    .gen-grid { flex: none; grid-template-columns: 1fr; }
     .gen-card { min-height: 120px; }
+    .gen-card-body { flex: none; overflow: visible; }
+    #generator { flex: none; }
     nav.steps { order: 10; width: 100%; margin-left: 0; justify-content: space-between; }
     .subtitle { display: none; }
     #clock { font-size: 15px; }
